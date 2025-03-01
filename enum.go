@@ -1,49 +1,60 @@
 package enums
 
+import (
+	"sync"
+)
+
 type numeric interface {
 	~int | ~int8 | ~int16 | ~int32 | ~int64 | ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64
 }
 
-func New[N numeric, S ~string](id string, definition map[N]S, options ...Option[N, S]) Enum[N, S] {
+func Register[S ~string, N numeric](dst *Enum[S, N], id string, definition map[S]N, options ...Option[S, N]) error {
+	if dst == nil {
+		return errFailedToRegister(id, "destination is required!")
+	}
+	if dst.Once == nil {
+		return errFailedToRegister(id, "destination is required!")
+	}
+	// Setup destination
 	if len(id) == 0 {
-		panic("[Enum] failed to create new enum: id is required")
+		return errFailedToRegister(id, "id is required!")
 	}
 	if len(definition) == 0 {
-		panic("[Enum] failed to create new enum: definition is required")
+		return errFailedToRegister(id, "definition is required!")
 	}
 	i, names, indexes := 0, make([]S, len(definition)), make([]N, len(definition))
-	for k, v := range definition {
-		indexes[i] = k
-		names[i] = v
+	for name, index := range definition {
+		names[i] = name
+		indexes[i] = index
 		i++
 	}
-	if !isUnique(names) {
-		panic("[Enum] failed to create new enum: names must be unique")
+	if !isUnique(indexes) {
+		return errFailedToRegister(id, "indexes must be unique!")
 	}
-	var enum Enum[N, S]
 	// Index
-	enum.index.id = id
-	enum.index.values = indexes
-	enum.index.typeName = typeNameOf(indexes[0], true)
+	dst.index.id = id
+	dst.index.values = indexes
+	dst.index.typeName = typeNameOf(indexes[0], true)
 	// Description
-	enum.desc.id = id
-	enum.desc.typeName = typeNameOf(names[0], true)
-	enum.desc.values = names
+	dst.desc.id = id
+	dst.desc.typeName = typeNameOf(names[0], true)
+	dst.desc.values = names
 	// Options
 	for n := range options {
-		options[n](&enum)
+		options[n](dst)
 	}
-	return enum
+	return nil
 }
 
-type Enum[N numeric, S ~string] struct {
+type Enum[S ~string, N numeric] struct {
+	Once  *sync.Once
 	index Index[N]
 	desc  Description[S]
 }
 
-func (e Enum[N, _]) Index() Index[N] { return e.index }
+func (e Enum[_, N]) Index() Index[N] { return e.index }
 
-func (e Enum[N, S]) IndexOf(desc S) N {
+func (e Enum[S, N]) IndexOf(desc S) N {
 	for i := range e.desc.values {
 		if desc == e.desc.values[i] {
 			return e.index.values[i]
@@ -52,9 +63,9 @@ func (e Enum[N, S]) IndexOf(desc S) N {
 	return e.index.undefined
 }
 
-func (e Enum[N, S]) Desc() Description[S] { return e.desc }
+func (e Enum[S, _]) Desc() Description[S] { return e.desc }
 
-func (e Enum[N, S]) Describe(index N) S {
+func (e Enum[S, N]) Describe(index N) S {
 	for i := range e.index.values {
 		if index == e.index.values[i] {
 			return e.desc.values[i]

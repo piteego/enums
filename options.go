@@ -1,10 +1,10 @@
 package enums
 
-type Option[N numeric, S ~string] func(*Enum[N, S])
+type Option[S ~string, N numeric] func(*Enum[S, N])
 
-func WithUndefinedValues[N numeric, S ~string](index N, name S) Option[N, S] {
-	return func(e *Enum[N, S]) {
-		e.index.undefined = index
+func UndefinedValues[S ~string, N numeric](name S, index N) Option[S, N] {
+	return func(e *Enum[S, N]) {
 		e.desc.undefined = name
+		e.index.undefined = index
 	}
 }

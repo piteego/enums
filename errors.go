@@ -6,15 +6,14 @@ import (
 )
 
 var (
-	// ErrNotRegisteredYet is returned when the given Numeric type is not registered in the internal registry.
-	// Register the Numeric values to fix this error.
-	ErrNotRegisteredYet = errors.New("enum not registered yet")
-	// ErrInvalidValue is returned when the given value is not one of the registered values of the given Numeric type.
+	// ErrFailedToRegister is returned when an Enum type could not be registered.
+	ErrFailedToRegister = errors.New("failed to register")
+	// ErrInvalidValue is returned when the given value an Enum is not one of its valid values.
 	ErrInvalidValue = errors.New("invalid enum value")
 )
 
-func errNotRegisteredYet(enumName string) error {
-	return fmt.Errorf("[Enum] %q %w", enumName, ErrNotRegisteredYet)
+func errFailedToRegister(enumId string, causedBy string) error {
+	return fmt.Errorf("[Enum] %w %q: %s", ErrFailedToRegister, enumId, causedBy)
 }
 
 func errInvalidValue(enumId string, expected any, got any) error {
