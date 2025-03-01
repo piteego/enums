@@ -21,11 +21,15 @@ func New[N numeric, S ~string](id string, definition map[N]S, options ...Option[
 		panic("[Enum] failed to create new enum: names must be unique")
 	}
 	var enum Enum[N, S]
-	enum.id = id
+	// Index
+	enum.index.id = id
 	enum.index.values = indexes
 	enum.index.typeName = typeNameOf(indexes[0], true)
-	enum.name.typeName = typeNameOf(names[0], true)
-	enum.name.values = names
+	// Description
+	enum.desc.id = id
+	enum.desc.typeName = typeNameOf(names[0], true)
+	enum.desc.values = names
+	// Options
 	for n := range options {
 		options[n](&enum)
 	}
@@ -33,59 +37,28 @@ func New[N numeric, S ~string](id string, definition map[N]S, options ...Option[
 }
 
 type Enum[N numeric, S ~string] struct {
-	id    string
-	index struct {
-		typeName  string
-		values    []N
-		undefined N
-	}
-	name struct {
-		typeName  string
-		values    []S
-		undefined S
-	}
+	index Index[N]
+	desc  Description[S]
 }
 
-func (e Enum[N, _]) Equals(index, target N, or ...N) bool { return equals(index, target, or...) }
+func (e Enum[N, _]) Index() Index[N] { return e.index }
 
-func (e Enum[N, _]) Indexes() []N { return e.index.values }
-
-func (e Enum[N, S]) IndexOf(name S) N {
-	for i := range e.name.values {
-		if name == e.name.values[i] {
+func (e Enum[N, S]) IndexOf(desc S) N {
+	for i := range e.desc.values {
+		if desc == e.desc.values[i] {
 			return e.index.values[i]
 		}
 	}
 	return e.index.undefined
 }
 
-func (e Enum[N, _]) Validate(index N) error {
+func (e Enum[N, S]) Desc() Description[S] { return e.desc }
+
+func (e Enum[N, S]) Describe(index N) S {
 	for i := range e.index.values {
 		if index == e.index.values[i] {
-			return nil
+			return e.desc.values[i]
 		}
 	}
-	return errInvalidValue(e.id, e.index.values, index)
-}
-
-func (e Enum[_, S]) NameEquals(name, target S, or ...S) bool { return equals(name, target, or...) }
-
-func (e Enum[_, S]) Names() []S { return e.name.values }
-
-func (e Enum[N, S]) NameOf(index N) S {
-	for i := range e.index.values {
-		if index == e.index.values[i] {
-			return e.name.values[i]
-		}
-	}
-	return e.name.undefined
-}
-
-func (e Enum[_, S]) ValidateName(name S) error {
-	for i := range e.name.values {
-		if name == e.name.values[i] {
-			return nil
-		}
-	}
-	return errInvalidValue(e.id, e.name.values, name)
+	return e.desc.undefined
 }

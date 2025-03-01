@@ -18,7 +18,7 @@ func typeNameOf(e any, descriptive bool) string {
 	return fmt.Sprintf("%s.%s", reflectType.PkgPath(), reflectType.Name())
 }
 
-func equals[T interface{ numeric | ~string }](value, target T, or ...T) bool {
+func is[T comparable](value, target T, or ...T) bool {
 	if value == target {
 		return true
 	}
@@ -31,7 +31,7 @@ func equals[T interface{ numeric | ~string }](value, target T, or ...T) bool {
 }
 
 // isUnique checks if all elements in the slice are unique
-func isUnique[T interface{ numeric | ~string }](slice []T) bool {
+func isUnique[T comparable](slice []T) bool {
 	seen := make(map[T]bool) // Map to track seen elements
 	for i := range slice {
 		if seen[slice[i]] {
