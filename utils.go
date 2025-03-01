@@ -18,18 +18,6 @@ func typeNameOf(e any, descriptive bool) string {
 	return fmt.Sprintf("%s.%s", reflectType.PkgPath(), reflectType.Name())
 }
 
-func is[T comparable](value, target T, or ...T) bool {
-	if value == target {
-		return true
-	}
-	for i := range or {
-		if value == or[i] {
-			return true
-		}
-	}
-	return false
-}
-
 // isUnique checks if all elements in the slice are unique
 func isUnique[T comparable](slice []T) bool {
 	seen := make(map[T]bool) // Map to track seen elements
@@ -40,4 +28,16 @@ func isUnique[T comparable](slice []T) bool {
 		seen[slice[i]] = true
 	}
 	return true // No duplicates found
+}
+
+func Is[E enumable](enum, target E, or ...E) bool {
+	if enum == target {
+		return true
+	}
+	for i := range or {
+		if enum == or[i] {
+			return true
+		}
+	}
+	return false
 }
