@@ -20,6 +20,7 @@ func main() {
 		log.Fatalf("Type name is required")
 	}
 	if err := cmd.Generate(__type); err != nil {
-		log.Fatalf("Failed to generate code for %s enum: %v\n", __type, err)
+		log.Fatalf("Failed to generate code: %v", err)
+		return
 	}
 }
