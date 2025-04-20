@@ -2,13 +2,15 @@ package cmd
 
 import (
 	"bytes"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
+	"log"
 	"os"
 	"strconv"
 	"strings"
 	"text/template"
 	"time"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 func Generate(typeName string) error {
@@ -32,7 +34,11 @@ func Generate(typeName string) error {
 	if err = tmpl.Execute(&buf, data); err != nil {
 		panic(err)
 	}
-	return os.WriteFile(data.OutputPath, buf.Bytes(), 0644)
+	if err := os.WriteFile(data.OutputPath, buf.Bytes(), 0644); err != nil {
+		return err
+	}
+	log.Printf("Successfully generated %s file for %s.%s ...\n", data.OutputPath, data.PackageName, data.TypeName)
+	return nil
 }
 
 // joinNames joins all enum value names using given separator
