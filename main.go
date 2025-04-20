@@ -2,8 +2,9 @@ package main
 
 import (
 	"flag"
-	"github.com/piteego/enums/cmd"
 	"log"
+
+	"github.com/piteego/enums/cmd"
 )
 
 func main() {
